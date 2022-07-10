@@ -1,3 +1,4 @@
+
 ## Recover a luks2 master-key from a kernel memory dump.
 
 This is an instruction for myself if I ever end up in the same situation again. Though it might also be useful for those who have accidentally wiped a key slot off of their luks2 device and no longer have access to a passphrase. 
@@ -51,12 +52,13 @@ The instructions have been tested on Fedora, but can be adjusted to work on othe
 
  7.  Run python script. (You will be asked to provide sudo password)
 
-	We will need a pair of 256 bit keys that are consecutive in the memory. You can do that by hand, or you can use the script as described below.   
-	
-	`python3 ./script.py`
-	
+     We will need a pair of 256 bit keys that are consecutive in the memory. You can do that by hand, or you can use the script as described below.   	
 
-	The script will automate the process for us by reading the output provided by findaes and generate master-keys in binary format. After that it will run `cryptsetup luksAddKey` command using generated binary files as --master-key-file argument.
+
+		`python3 ./script.py`
+
+
+     The script will automate the process for us by reading the output provided by findaes and generate master-keys in binary format. After that it will run cryptsetup luksAddKey command using generated binary files as --master-key-file argument.
 
 
  8. Set new passphrase when asked.   
