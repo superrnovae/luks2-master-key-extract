@@ -8,7 +8,7 @@ device = '/dev/any/any'
 def generate():
     with open('keys') as f_in:
         lines = f_in.readlines()
-        for i in range(1, len(lines), 4):
+        for i in range(1, len(lines), 2):
             if i+1 < len(lines):
                 p1 = lines[i].rstrip().replace(" ", "")
                 p2 = lines[i+2].rstrip().replace(" ", "")
