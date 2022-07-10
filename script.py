@@ -8,7 +8,7 @@ device = '/dev/any/any'
 def generate():
     with open('keys') as f_in:
         lines = f_in.readlines()
-        for i in range(1, len(lines), 2):
+        for i in range(1, len(lines), 4):
             if i+1 < len(lines):
                 p1 = lines[i].rstrip().replace(" ", "")
                 p2 = lines[i+2].rstrip().replace(" ", "")
@@ -22,10 +22,9 @@ def generate():
 def penetrate():
     file_path = os.path.dirname(os.path.abspath(__file__))
     for file in os.listdir(file_path):
-        if file.endswith('.bin'):
-            p = run(['sudo', 'cryptsetup', 'luksAddKey', f'{device}', '--master-key-file', f'{file}'])
-            if p.returncode == 0:
-                exit()
+        p = run(['sudo', 'cryptsetup', 'luksAddKey', f'{device}', '--master-key-file', f'{file}'])
+        if p.returncode == 0:
+            exit()
 
 
 if __name__ == '__main__':
