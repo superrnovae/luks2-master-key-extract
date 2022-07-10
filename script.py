@@ -22,9 +22,10 @@ def generate():
 def penetrate():
     file_path = os.path.dirname(os.path.abspath(__file__))
     for file in os.listdir(file_path):
-        p = run(['sudo', 'cryptsetup', 'luksAddKey', f'{device}', '--master-key-file', f'{file}'])
-        if p.returncode == 0:
-            exit()
+        if file.endswith('.bin'):
+            p = run(['sudo', 'cryptsetup', 'luksAddKey', f'{device}', '--master-key-file', f'{file}'])
+            if p.returncode == 0:
+                exit()
 
 
 if __name__ == '__main__':
