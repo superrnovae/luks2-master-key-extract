@@ -11,7 +11,7 @@ This is an instruction for myself if I ever end up in the same situation again. 
  
 Since the deprecation of /dev/kmem, linux no longer provides access to kernel's address space from the userland.
 
-Thankfully, there is an out of tree kernel module LiME, that we can load to acquire volatile memory from Linux and Linux-based devices.
+Thankfully, there is an out of tree kernel module [LiME](https://github.com/504ensicsLabs/LiME/), that we can load to acquire volatile memory from Linux and Linux-based devices.
 
 The instructions have been tested on Fedora, but can be adjusted to work on other distributions.
 
