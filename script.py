@@ -12,7 +12,7 @@ def generate():
             if i+1 < len(lines):
                 p1 = lines[i].rstrip().replace(" ", "")
                 p2 = lines[i+2].rstrip().replace(" ", "")
-                chunk = binascii.unhexlify(p1+p2)
+                chunk = binascii.unhexlify(p2+p1)
                 with open(f"key{i}.bin", 'wb') as f_out:
                     f_out.write(chunk)
                     f_out.close()
