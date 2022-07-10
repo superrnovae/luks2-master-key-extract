@@ -47,7 +47,7 @@ The instructions have been tested on Fedora, but can be adjusted to work on othe
 
 	You will find the output in the file named 'keys'
 
-		6. Modify the device variable in script.py to fit your setup.
+ 6. Modify the device variable in script.py to fit your setup.
 
  7.  Run python script. (You will be asked to provide sudo password)
 
@@ -62,3 +62,9 @@ The instructions have been tested on Fedora, but can be adjusted to work on othe
  8. Set new passphrase when asked.   
 
  9. Use any of the available tools to securely delete all generated files.
+ 
+ ---
+ 
+### Articles
+ - [Breaking full disk encryption from a memory dump](https://blog.appsecco.com/breaking-full-disk-encryption-from-a-memory-dump-5a868c4fc81e)
+ - [Open encrypted luks volume](https://heisenberk.github.io/Open-Encrypted-LUKS-Volume/)
