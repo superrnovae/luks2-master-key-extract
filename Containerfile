@@ -1,7 +1,9 @@
 FROM registry.fedoraproject.org/fedora:latest as builder
 
-ARG LIME_VERSION
 ARG KERNEL_VERSION
+ARG LIME_VERSION
+ARG LIME_SHA256
+# r83 -> d1d8e1c7dc464deeb53e5667b7e7a40915cc87404445a779057e18448ad565e0
 
 WORKDIR /tmp
 
@@ -19,9 +21,9 @@ RUN cd /tmp/koji && \
     
     
 RUN curl -LS https://github.com/504ensicsLabs/LiME/tarball/master| \
-    { t="$(mktemp)"; trap "rm -f '$t'" INT TERM EXIT; cat >| "$t"; true \
+    { t="$(mktemp)"; trap "rm -f '$t'" INT TERM EXIT; cat >| "$t"; sha256sum --quiet -c <<<"${LIME_SHA256} $t" \
     || exit 1; cat "$t"; } | tar xzf - && \
-    mv "${t}"*LiME* LiME-${LIME_VERSION}
+    mv "$t"*LiME* LiME-${LIME_VERSION}
 
 RUN cd /tmp/LiME-${LIME_VERSION}/src; \
     make -j$(nproc)

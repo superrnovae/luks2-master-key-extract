@@ -30,33 +30,20 @@ fi
 
 PRUNE_OLD_VERSIONS=false
 LIME_VERSION=1.9.1
+LIME_SHA256=d1d8e1c7dc464deeb53e5667b7e7a40915cc87404445a779057e18448ad565e0
 BUILD_SOURCE=.
 KERNEL_VERSION=$(uname -r)
 
 build_lime() {
   if [[ "$(podman images -n | grep lime | awk '{print $2}')" =~ (^|[[:space:]])${LIME_VERSION}($|[[:space:]]) ]]; then
-    echo "The lime ${LIME_VERSION} image is up to date"
+    echo "LiME ${LIME_VERSION} image is up to date"
   else
-
-    echo "The lime ${LIME_VERSION} kernel module image is outdated"
+    echo "LiME ${LIME_VERSION} kernel module image is outdated"
     echo "Building ${LIME_VERSION} kernel module for ${KERNEL_VERSION} ..."
     __podman_build
   fi
 
-  if [ "${LIME_VERSION}" != "$(podman run --name lime -e "LIME_VERSION=${LIME_VERSION}" \
-    -e "KERNEL_VERSION=${KERNEL_VERSION}" --rm --privileged \
-    lime:"${LIME_VERSION}" modinfo /usr/lib/modules/"${KERNEL_VERSION}"/extra/lime-"${KERNEL_VERSION}".ko |
-    grep '^version' | awk '{print $2}')" ]; then
-
-    echo "The lime kernel module for ${KERNEL_VERSION} is outdated."
-    echo "Building ${LIME_VERSION} kernel module for ${KERNEL_VERSION} ..."
-    __podman_build
-
-  else
-    echo "The lime kernel module for ${lime_KERNEL_VERSION} is up to date."
-  fi
-
-  echo "Cleaning up old lime kernel module container builds..."
+  echo "Cleaning up unused dangling images"
   podman rmi "$(podman images -f "dangling=true" -q)" &>/dev/null || :
 
   if [ "$PRUNE_OLD_VERSIONS" = true ]; then
@@ -68,19 +55,17 @@ build_lime() {
 
 load_lime() {
   if ! lsmod | grep "lime" &>/dev/null; then
-    echo "Loading lime module..."
+    echo "Loading LiME module..."
     podman run --name lime --volume /opt:/opt -e "LIME_VERSION=${LIME_VERSION}" \
       -e "KERNEL_VERSION=${KERNEL_VERSION}" --rm --privileged \
       lime:"${LIME_VERSION}" \
       insmod /usr/lib/modules/"${KERNEL_VERSION}"/extra/lime-"${KERNEL_VERSION}".ko "path=/opt/dump format=lime"
       rmmod lime
-  else
-    rmmod lime
   fi
 }
 
 unload_lime() {
-  echo "Unloading lime..."
+  echo "Unloading LiME..."
   if lsmod | grep "lime" &>/dev/null; then
     rmmod lime
   fi
@@ -88,6 +73,7 @@ unload_lime() {
 
 __podman_build() {
   podman build --build-arg LIME_VERSION="${LIME_VERSION}" \
+    --build-arg LIME_SHA256="${LIME_SHA256}" \
     --build-arg KERNEL_VERSION="${KERNEL_VERSION}" \
     -t lime:"${LIME_VERSION}" "${BUILD_SOURCE}"
 }
