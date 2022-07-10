@@ -1,0 +1,116 @@
+#!/bin/bash
+
+# The MIT License
+
+# Copyright (c) 2022 superrnovae
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+set -e
+
+if [ $(id -u) -ne 0 ]; then
+  echo "Please run as root"
+  exit 1
+fi
+
+PRUNE_OLD_VERSIONS=false
+LIME_VERSION=1.9.1
+BUILD_SOURCE=.
+KERNEL_VERSION=$(uname -r)
+
+build_lime() {
+  if [[ "$(podman images -n | grep lime | awk '{print $2}')" =~ (^|[[:space:]])${LIME_VERSION}($|[[:space:]]) ]]; then
+    echo "The lime ${LIME_VERSION} image is up to date"
+  else
+
+    echo "The lime ${LIME_VERSION} kernel module image is outdated"
+    echo "Building ${LIME_VERSION} kernel module for ${KERNEL_VERSION} ..."
+    __podman_build
+  fi
+
+  if [ "${LIME_VERSION}" != "$(podman run --name lime -e "LIME_VERSION=${LIME_VERSION}" \
+    -e "KERNEL_VERSION=${KERNEL_VERSION}" --rm --privileged \
+    lime:"${LIME_VERSION}" modinfo /usr/lib/modules/"${KERNEL_VERSION}"/extra/lime-"${KERNEL_VERSION}".ko |
+    grep '^version' | awk '{print $2}')" ]; then
+
+    echo "The lime kernel module for ${KERNEL_VERSION} is outdated."
+    echo "Building ${LIME_VERSION} kernel module for ${KERNEL_VERSION} ..."
+    __podman_build
+
+  else
+    echo "The lime kernel module for ${lime_KERNEL_VERSION} is up to date."
+  fi
+
+  echo "Cleaning up old lime kernel module container builds..."
+  podman rmi "$(podman images -f "dangling=true" -q)" &>/dev/null || :
+
+  if [ "$PRUNE_OLD_VERSIONS" = true ]; then
+    for OLD_IMAGES in $(podman images -n | grep lime | grep -v "${LIME_VERSION}" | awk '{print $3}'); do
+      podman rmi "${OLD_IMAGES}" &>/dev/null || :
+    done
+  fi
+}
+
+load_lime() {
+  if ! lsmod | grep "lime" &>/dev/null; then
+    echo "Loading lime module..."
+    podman run --name lime --volume /opt:/opt -e "LIME_VERSION=${LIME_VERSION}" \
+      -e "KERNEL_VERSION=${KERNEL_VERSION}" --rm --privileged \
+      lime:"${LIME_VERSION}" \
+      insmod /usr/lib/modules/"${KERNEL_VERSION}"/extra/lime-"${KERNEL_VERSION}".ko "path=/opt/dump format=lime"
+      rmmod lime
+  else
+    rmmod lime
+  fi
+}
+
+unload_lime() {
+  echo "Unloading lime..."
+  if lsmod | grep "lime" &>/dev/null; then
+    rmmod lime
+  fi
+}
+
+__podman_build() {
+  podman build --build-arg LIME_VERSION="${LIME_VERSION}" \
+    --build-arg KERNEL_VERSION="${KERNEL_VERSION}" \
+    -t lime:"${LIME_VERSION}" "${BUILD_SOURCE}"
+}
+
+case "$1" in
+build)
+  build_lime
+  ;;
+
+load)
+  load_lime
+  ;;
+
+unload)
+  unload_lime
+  ;;
+*)
+  echo $"Unknown command. Exiting."
+  echo "Usage:"
+  echo ""
+  echo "build       Build lime kernel module container"
+  echo "load        Load lime kernel module"
+  echo "unload      Unload lime kernel module"
+  exit 1
+  ;;
+esac
