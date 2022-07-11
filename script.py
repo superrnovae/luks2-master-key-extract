@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import binascii
 import os
 from subprocess import run

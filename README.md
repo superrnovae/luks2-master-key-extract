@@ -55,7 +55,10 @@ The instructions have been tested on Fedora, but can be adjusted to work on othe
      We will need a pair of 256 bit keys that are consecutive in the memory. You can do that by hand, or you can use the script as described below.   	
 
 
-		`python3 ./script.py`
+		````
+		chmod +x script.py
+		./script.py
+		````
 
 
      The script will automate the process for us by reading the output provided by findaes and generate master-keys in binary format. After that it will run cryptsetup luksAddKey command using generated binary files as --master-key-file argument.
