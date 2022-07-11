@@ -1,9 +1,8 @@
 #!/usr/bin/python3
 import binascii
 import os
+import sys
 from subprocess import run
-
-device = '/dev/any/any'
 
 
 def generate():
@@ -29,5 +28,10 @@ def penetrate():
 
 
 if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        device = sys.argv[1]
+    else:
+        print("Device argument missing")
+        exit(1)
     generate()
     penetrate()

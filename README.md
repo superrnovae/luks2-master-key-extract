@@ -48,25 +48,24 @@ The instructions have been tested on Fedora, but can be adjusted to work on othe
 
 	You will find the output in the file named 'keys'
 
- 6. Modify the device variable in script.py to fit your setup.
 
- 7.  Run python script. (You will be asked to provide sudo password)
+ 6.  Run python script. (You will be asked to provide sudo password)
 
-     We will need a pair of 256 bit keys that are consecutive in the memory. You can do that by hand, or you can use the script as described below.   	
+     We will need a pair of 256 bit keys that are consecutive in the memory. You can do that by hand, or you can use the script as shown below (Replace /dev/any/any with your device).  	
 
 
 		````
 		chmod +x script.py
-		./script.py
+		./script.py /dev/any/any
 		````
 
 
      The script will automate the process for us by reading the output provided by findaes and generate master-keys in binary format. After that it will run cryptsetup luksAddKey command using generated binary files as --master-key-file argument.
 
 
- 8. Set new passphrase when asked.   
+ 7. Set new passphrase when asked.   
 
- 9. Use any of the available tools to securely delete all generated files.
+ 8. Use any of the available tools to securely delete all generated files.
  
  ---
  
