@@ -1,30 +1,26 @@
-#!/usr/bin/python3
 import binascii
-import os
 import sys
 from subprocess import run
+from pathlib import Path
 
 
 def generate():
-    with open('keys') as f_in:
+    with open('keys', 'r') as f_in:
         lines = f_in.readlines()
         for i in range(1, len(lines), 2):
             if i+1 < len(lines):
-                p1 = lines[i].rstrip().replace(" ", "")
-                p2 = lines[i+2].rstrip().replace(" ", "")
+                p1 = lines[i].strip().replace(" ", "")
+                p2 = lines[i+2].strip().replace(" ", "")
                 chunk = binascii.unhexlify(p2+p1)
                 with open(f"key{i}.bin", 'wb') as f_out:
                     f_out.write(chunk)
-                    f_out.close()
-        f_in.close()
 
 
 def penetrate():
-    file_path = os.path.dirname(os.path.abspath(__file__))
-    for file in os.listdir(file_path):
+    for file in Path.cwd().rglob("*.bin"):
         p = run(['sudo', 'cryptsetup', 'luksAddKey', f'{device}', '--master-key-file', f'{file}'])
         if p.returncode == 0:
-            exit()
+            exit(0)
 
 
 if __name__ == '__main__':
